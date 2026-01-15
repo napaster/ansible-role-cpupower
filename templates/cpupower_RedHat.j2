@@ -2,17 +2,17 @@
 {{ '# ' + ansible_managed }}
 {{ '# Do not edit manually' }}
 
-{{ 'CPUPOWER_START_OPTS' + '=\"' + 'frequency-set' -}}
-{% for c in vars['cpupower_settings'] %}
-{% if c.governor is defined and c.governor in ['ondemand', 'performance',
+{{ 'CPUPOWER_START_OPTS=\"' + 'frequency-set' -}}
+{% for c in lookup('ansible.builtin.vars', 'cpupower_settings') %}
+{% if c['governor'] is defined and c['governor'] in ['ondemand', 'performance',
   'powersave', 'conservative', 'userspace'] %}
-{{ ' ' ~ '-g' ~ ' ' ~ c.governor -}}
+{{ ' -g ' + c['governor'] -}}
 {% endif %}
-{% if c.min_freq is defined and c.min_freq != '' %}
-{{ ' ' ~ '-d' ~ ' ' ~ c.min_freq -}}
+{% if c['min_freq'] is defined and c['min_freq'] not in ['', [], '[]', None] %}
+{{ ' -d ' ~ c['min_freq'] -}}
 {% endif %}
-{% if c.max_freq is defined and c.max_freq != '' %}
-{{ ' ' ~ '-u' ~ ' ' ~ c.max_freq -}}
+{% if c['max_freq'] is defined and c['max_freq'] not in ['', [], '[]', None] %}
+{{ ' -u ' ~ c['max_freq'] -}}
 {% endif %}
 {% endfor %}
 {{ '\"' }}

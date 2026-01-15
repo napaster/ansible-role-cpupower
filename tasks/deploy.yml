@@ -1,8 +1,8 @@
 ---
 - name: "cpupower | Deploy cpupower configuration"
   ansible.builtin.template:
-    src: "{{ 'cpupower_' + hostvars[inventory_hostname]['ansible_os_family'] +
-      '.j2' }}"
+    src: "{{ 'cpupower_' +
+      hostvars[inventory_hostname]['ansible_facts']['os_family'] + '.j2' }}"
     dest: "{{ hostvars[inventory_hostname]['cpupower_conf_dest'] }}"
     owner: "root"
     group: "root"
@@ -15,10 +15,9 @@
     enabled: "yes"
   when:
     - "hostvars[inventory_hostname]['cpupower'] is defined"
-    - "hostvars[inventory_hostname]['cpupower'] != ''"
+    - "hostvars[inventory_hostname]['cpupower'] not in ['', [], '[]', None]"
     - "hostvars[inventory_hostname]['cpupower'] |
-       community.general.json_query(vars['cpupower_enable']) is defined"
-    - "hostvars[inventory_hostname]['cpupower'] |
-       community.general.json_query(vars['cpupower_enable']) == 'true'"
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'cpupower_enable', default='')) == 'true'"
   vars:
     cpupower_enable: "[] | map(&enable || 'false', @) | [0]"

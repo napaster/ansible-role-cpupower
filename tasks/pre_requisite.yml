@@ -2,18 +2,21 @@
 - name: "cpupower | Assert that ansible facts gathered successfully"
   ansible.builtin.assert:
     that:
-      - "hostvars[inventory_hostname]['ansible_service_mgr'] is defined"
+      - "hostvars[inventory_hostname]['ansible_facts']['service_mgr'] is
+        defined"
     fail_msg: "'ansible_facts' not found. Please enable facts gathering"
     quiet: "true"
 - name: "cpupower | Assert that system manager is systemd"
   ansible.builtin.assert:
     that:
-      - "hostvars[inventory_hostname]['ansible_service_mgr'] == 'systemd'"
+      - "hostvars[inventory_hostname]['ansible_facts']['service_mgr'] ==
+        'systemd'"
     fail_msg: "System manager is not systemd"
     quiet: "true"
 - name: "cpupower | Add the OS specific variables"
   ansible.builtin.include_vars:
-    file: "{{ hostvars[inventory_hostname]['ansible_os_family'] + '.yml' }}"
+    file: "{{ hostvars[inventory_hostname]['ansible_facts']['os_family'] +
+      '.yml' }}"
 - name: "cpupower | Set facts about cpupower role"
   ansible.builtin.set_fact:
     cpupower_settings: "{{ hostvars[inventory_hostname]['cpupower'] |
@@ -22,24 +25,22 @@
       community.general.json_query('[].package_state | [0]') | default(omit) }}"
   when:
     - "hostvars[inventory_hostname]['cpupower'] is defined"
-    - "hostvars[inventory_hostname]['cpupower'] != []"
-    - "hostvars[inventory_hostname]['cpupower'] != ''"
-    - "hostvars[inventory_hostname]['cpupower'] != None"
+    - "hostvars[inventory_hostname]['cpupower'] not in ['', [], '[]', None]"
 - name: "cpupower | Assert that cpupower package state in valid value"
   ansible.builtin.assert:
     that:
-      - "vars['cpupower_package_state'] in ['present', 'latest']"
-    fail_msg: "'package_state' must be in 'present' or 'latest'"
+      - "lookup('ansible.builtin.vars', 'cpupower_package_state') in
+        ['present', 'latest']"
+    fail_msg: "{{ 'package_state must be in `present` or `latest`,
+      current is: ' + lookup('ansible.builtin.vars',
+      'cpupower_package_state') }}"
     quiet: "true"
   when:
-    - "vars['cpupower_package_state'] is defined"
-    - "vars['cpupower_package_state'] != []"
-    - "vars['cpupower_package_state'] != ''"
-    - "vars['cpupower_package_state'] != None"
-- name: "cpupower | Assert that cpupower package state in valid value"
+    - "lookup('ansible.builtin.vars', 'cpupower_package_state',
+      default='') not in ['', [], '[]', None, 'present', 'latest']"
+- name: "cpupower | Set package state to 'present' cause value is not defined"
   ansible.builtin.set_fact:
-    cpupower_package_state: 'present'
+    cpupower_package_state: "present"
   when:
-    - "vars['cpupower_package_state'] is defined"
-    - "(vars['cpupower_package_state'] == '' or
-      vars['cpupower_package_state'] == None)"
+    - "lookup('ansible.builtin.vars', 'cpupower_package_state',
+      default='') in ['', [], '[]', None]"

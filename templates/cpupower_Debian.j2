@@ -3,15 +3,15 @@
 {{ '# Do not edit manually' }}
 
 {{ 'ENABLE="true"' }}
-{% for c in vars['cpupower_settings'] %}
-{% if c.governor is defined and c.governor in ['ondemand', 'performance',
+{% for c in lookup('ansible.builtin.vars', 'cpupower_settings') %}
+{% if c['governor'] is defined and c['governor'] in ['ondemand', 'performance',
   'powersave', 'conservative', 'userspace'] %}
-{{ 'GOVERNOR' + '=\"' + c.governor + '\"' }}
+{{ 'GOVERNOR=\"' + c['governor'] + '\"' }}
 {% endif %}
-{% if c.min_freq is defined and c.min_freq != '' %}
-{{ 'MAX_SPEED' ~ '=\"' ~ c.min_freq + '\"' }}
+{% if c['min_freq'] is defined and c['min_freq'] not in ['', [], '[]', None] %}
+{{ 'MAX_SPEED=\"' ~ c['min_freq'] ~ '\"' }}
 {% endif %}
-{% if c.max_freq is defined and c.max_freq != '' %}
-{{ 'MIN_SPEED' ~ '=\"' ~ c.max_freq + '\"' }}
+{% if c['max_freq'] is defined and c['max_freq'] not in ['', [], '[]', None] %}
+{{ 'MIN_SPEED=\"' ~ c['max_freq'] ~ '\"' }}
 {% endif %}
 {% endfor %}

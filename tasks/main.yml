@@ -7,18 +7,15 @@
     file: "packages.yml"
   when:
     - "hostvars[inventory_hostname]['cpupower'] is defined"
-    - "hostvars[inventory_hostname]['cpupower'] != ''"
+    - "hostvars[inventory_hostname]['cpupower'] not in ['', [], '[]', None]"
     - "hostvars[inventory_hostname]['cpupower'] |
-       community.general.json_query(vars['cpupower_install_package']) is
-       defined"
-    - "hostvars[inventory_hostname]['cpupower'] |
-       community.general.json_query(vars['cpupower_install_package']) ==
-       'true'"
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'cpupower_install_package', default='')) == 'true'"
   vars:
     cpupower_install_package: "[] | map(&install_package || 'false', @) | [0]"
 - name: "cpupower | Include deployment tasks"
   ansible.builtin.import_tasks:
     file: "deploy.yml"
   when:
-    - "vars['cpupower_settings'] is defined"
-    - "vars['cpupower_settings'] != []"
+    - "lookup('ansible.builtin.vars', 'cpupower_settings', default='')
+      not in ['', [], '[]', None]"
