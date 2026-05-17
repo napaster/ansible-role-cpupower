@@ -5,6 +5,8 @@ Linux kernel tool to tune CPU power saving related features
 ## Requirements
 
 * Ansible 3.0.0+
+* Debian uses the `linux-cpupower` package. Because Debian 13 does not ship a
+  cpupower systemd service, this role deploys one to `/etc/systemd/system`.
 
 ## Example configuration
 

@@ -1,0 +1,16 @@
+{{ '# ' + ansible_managed }}
+{{ '# Do not edit manually' }}
+
+[Unit]
+Description=Apply cpupower settings
+Documentation=man:cpupower(1)
+After=multi-user.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-{{ hostvars[inventory_hostname]['cpupower_conf_dest'] }}
+ExecStart=/usr/bin/cpupower $CPUPOWER_START_OPTS
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
